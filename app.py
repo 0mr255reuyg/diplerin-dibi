@@ -96,12 +96,45 @@ def hesapla_rsi(df, period=21):
     return 100-100/(1+g/ls.replace(0,np.nan))
 
 def mfi_dip_bul(mfi, v=35.0):
-    d = mfi.dropna(); d = d[d<50]
-    if len(d)<10: return v
+    """
+    1 yıllık MFI verisindeki yerel dipleri bulur,
+    bu diplerin kümelendiği seviyeyi KDE ile tespit eder,
+    ardından o seviyenin 7 puan üstünü dip eşiği olarak döner.
+    Örnek: Gerçek dipler 38 civarında kümelendiyse → eşik = 45
+    """
+    seri = mfi.dropna()
+    if len(seri) < 30:
+        return v
+
+    # Yerel dipleri bul (her iki taraftan da düşük olan noktalar)
+    values = seri.values
+    yerel_dipler = []
+    pencere = 5  # her iki yönde kaç bar bakılsın
+    for i in range(pencere, len(values) - pencere):
+        bolge = values[i - pencere: i + pencere + 1]
+        if values[i] == bolge.min() and values[i] < 50:
+            yerel_dipler.append(values[i])
+
+    if len(yerel_dipler) < 3:
+        # Yerel dip bulamazsak genel alt bölgeyi kullan
+        alt_bolge = seri[seri < 45]
+        if len(alt_bolge) < 5:
+            return v
+        yerel_dipler = alt_bolge.values.tolist()
+
+    dipler = np.array(yerel_dipler)
+
     try:
-        kde = stats.gaussian_kde(d); x = np.linspace(d.min(),d.max(),500)
-        return float(np.clip(x[np.argmax(kde(x))],20.0,45.0))
-    except: return v
+        kde = stats.gaussian_kde(dipler)
+        x = np.linspace(dipler.min(), min(dipler.max(), 50), 500)
+        # En sık dip seviyesi
+        en_sik_dip = float(x[np.argmax(kde(x))])
+        # O seviyenin 7 puan üstü = dip eşiği
+        esik = en_sik_dip + 7.0
+        # 20-55 arasında sınırla
+        return float(np.clip(esik, 20.0, 55.0))
+    except:
+        return v
 
 # ══════════════════════════════════════════════════════
 # PUANLAMA — sadece TAM PUAN ya da 0
