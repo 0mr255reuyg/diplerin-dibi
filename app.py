@@ -11,23 +11,62 @@ import matplotlib.gridspec as gridspec
 from scipy import stats
 
 # ══════════════════════════════════════════════════════
-# GÜNCEL BIST 100 LİSTESİ (Mart 2025)
+# BIST 100 LİSTESİ — 1 Nisan 2026 İtibariyle Kesin Güncel
+#
+# BIST 100'den ÇIKAN (sadece 5 hisse):
+#   EGEEN, KOCR, TSPOR, TTRAK, YEOTK
+#
+# BIST 100'e GİREN (5 hisse):
+#   CVKMD, EUPWR, PASEU, PAGYO, SARKY
+#
+# ÖNEMLİ NOTLAR:
+#   ULKER → Sadece BIST 30'dan çıktı, BIST 100'DE KALMAYA DEVAM EDİYOR
+#   DOHOL → Sadece BIST 50'den çıktı, BIST 100'DE KALMAYA DEVAM EDİYOR
+#   SOKM  → Sadece BIST 50'den çıktı, BIST 100'DE KALMAYA DEVAM EDİYOR
+#   VAKBN → BIST 30'a girdi, zaten BIST 100'deydi
+#   CANTE → BIST 50'ye girdi, BIST 100'e de eklendi
+#   TURSG → BIST 50'ye girdi, BIST 100'e de eklendi
 # ══════════════════════════════════════════════════════
 BIST100 = [
-    "ACSEL","ADEL","AEFES","AGESA","AKBNK","AKSA","AKSEN","ALARK","ALBRK",
-    "ALFAS","ALKIM","ANACM","ARCLK","ARDYZ","ASELS","ASTOR","BERA","BIMAS",
-    "BIOEN","BRISA","BRYAT","BUCIM","CCOLA","CIMSA","CLEBI","CVKMD",
-    "DOAS","DOHOL","DSTKF","ECILC","ENJSA","ENKAI","EREGL","EUPWR",
-    "FROTO","GARAN","GESAN","GLYHO","GOLTS","GUBRF","HALKB","HEKTS",
-    "IPEKE","ISCTR","ISFIN","ISGYO","ISYHO","ITTFK","IZOCM",
+    "ACSEL","ADEL","AEFES","AGESA","AGHOL","AKBNK","AKSA","AKSEN",
+    "ALARK","ALBRK","ALFAS","ALKIM","ANACM","ARCLK","ARDYZ","ASELS",
+    "ASTOR","BERA","BFREN","BIMAS","BIOEN","BRISA","BRYAT","BUCIM",
+    "CANTE","CCOLA","CEMTS","CIMSA","CLEBI","CVKMD",
+    "DOAS","DOHOL","DSTKF","DYOBY","ECILC","ENJSA","ENKAI","EREGL","EUPWR",
+    "FROTO","GARAN","GESAN","GLYHO","GOLTS","GUBRF",
+    "HALKB","HEKTS","IPEKE","ISCTR","ISFIN","ISGYO","ISYHO","ITTFK","IZOCM",
     "KAREL","KARSN","KCAER","KCHOL","KLMSN","KONTR","KONYA","KORDS",
-    "KOZAA","KOZAL","KRDMD","LOGO","MAVI","MGROS","MPARK","NETAS",
-    "ODAS","OTKAR","OYAKC","PETKM","PGSUS","PKENT","POLHO","QUAGR",
-    "RGYAS","SAHOL","SASA","SELEC","SISE","SKBNK","SMART","SOKM",
-    "TATGD","TCELL","THYAO","TKFEN","TOASO","TSKB","TTKOM","TTRAK",
-    "TUPRS","TURSG","ULKER","VAKBN","VESTL","YKBNK","ZOREN",
-    "AGHOL","BFREN","CEMTS","DYOBY","PRKME"
+    "KOZAA","KOZAL","KRDMD","LOGO","MAVI","MGROS","MPARK",
+    "NETAS","ODAS","OTKAR","OYAKC","PAGYO","PASEU",
+    "PETKM","PGSUS","PKENT","POLHO","PRKME","QUAGR",
+    "RGYAS","SAHOL","SARKY","SASA","SELEC","SISE","SKBNK","SMART","SOKM",
+    "TATGD","TCELL","THYAO","TKFEN","TOASO","TSKB","TTKOM","TUPRS",
+    "TURSG","ULKER","VAKBN","VESTL","YKBNK","ZOREN",
 ]
+
+# ══════════════════════════════════════════════════════
+# GELECEK VADEDENLERi — 14 Yükselen Yıldız
+# BIST 100 dışı, 2030-2035 hedefli seçilmiş hisseler
+# ══════════════════════════════════════════════════════
+YILDIZLAR = [
+    "A1CAP",   # A1 Capital — Finans ekosistemi
+    "SDTTR",   # SDT Uzay ve Savunma
+    "ALTNY",   # Altınay Savunma
+    "HTTBT",   # Hitit Bilgisayar
+    "GWIND",   # Galata Wind
+    "RYSAS",   # Reysaş Lojistik
+    "GENIL",   # Gen İlaç
+    "PAPIL",   # Papilon Savunma
+    "MAGEN",   # Margün Enerji
+    "FORTE",   # Forte Bilişim
+    "RTALB",   # RTA Laboratuvarları
+    "LKMNH",   # Lokman Hekim
+    "VBTYZ",   # VBT Yazılım
+    "KFEIN",   # Kafein Yazılım
+]
+
+# TÜM HİSSELER = BIST100 + YILDIZLAR (tekrar olmayanlar)
+TUMHISSELER = BIST100 + [h for h in YILDIZLAR if h not in BIST100]
 
 R = {
     "TKE":"#FF6B35","StochRSI":"#4ECDC4","MFI":"#FFE66D","RSI":"#A8DADC",
@@ -96,76 +135,46 @@ def hesapla_rsi(df, period=21):
     return 100-100/(1+g/ls.replace(0,np.nan))
 
 def mfi_dip_bul(mfi, v=35.0):
-    """
-    1 yıllık MFI verisindeki yerel dipleri bulur,
-    bu diplerin kümelendiği seviyeyi KDE ile tespit eder,
-    ardından o seviyenin 7 puan üstünü dip eşiği olarak döner.
-    Örnek: Gerçek dipler 38 civarında kümelendiyse → eşik = 45
-    """
     seri = mfi.dropna()
     if len(seri) < 30:
         return v
-
-    # Yerel dipleri bul (her iki taraftan da düşük olan noktalar)
     values = seri.values
     yerel_dipler = []
-    pencere = 5  # her iki yönde kaç bar bakılsın
+    pencere = 5
     for i in range(pencere, len(values) - pencere):
         bolge = values[i - pencere: i + pencere + 1]
         if values[i] == bolge.min() and values[i] < 50:
             yerel_dipler.append(values[i])
-
     if len(yerel_dipler) < 3:
-        # Yerel dip bulamazsak genel alt bölgeyi kullan
         alt_bolge = seri[seri < 45]
         if len(alt_bolge) < 5:
             return v
         yerel_dipler = alt_bolge.values.tolist()
-
     dipler = np.array(yerel_dipler)
-
     try:
         kde = stats.gaussian_kde(dipler)
         x = np.linspace(dipler.min(), min(dipler.max(), 50), 500)
-        # En sık dip seviyesi
         en_sik_dip = float(x[np.argmax(kde(x))])
-        # O seviyenin 7 puan üstü = dip eşiği
         esik = en_sik_dip + 7.0
-        # 20-55 arasında sınırla
         return float(np.clip(esik, 20.0, 55.0))
     except:
         return v
 
 # ══════════════════════════════════════════════════════
-# PUANLAMA — sadece TAM PUAN ya da 0
+# PUANLAMA
 # ══════════════════════════════════════════════════════
 def puan_hesapla(tke_v, sk_v, sd_v, mfi_v, rsi_v, mfi_dip=35.0):
     def nan_kontrol(val):
         return val is None or (isinstance(val, float) and np.isnan(val))
-
-    # TKE → dip seviyesi 20 altındaysa 30, değilse 0
-    p_tke = 30.0 if (not nan_kontrol(tke_v) and tke_v <= 20) else 0.0
-
-    # StochRSI → K ve D ortalaması 20 altındaysa 30, değilse 0
+    p_tke   = 30.0 if (not nan_kontrol(tke_v) and tke_v <= 20) else 0.0
     if nan_kontrol(sk_v) or nan_kontrol(sd_v):
         p_stoch = 0.0
     else:
-        stoch_ort = (sk_v + sd_v) / 2
-        p_stoch = 30.0 if stoch_ort <= 20 else 0.0
-
-    # MFI → hisse özelinde dip seviyesi altındaysa 30, değilse 0
-    p_mfi = 30.0 if (not nan_kontrol(mfi_v) and mfi_v <= mfi_dip) else 0.0
-
-    # RSI → 40 altındaysa 10, değilse 0
-    p_rsi = 10.0 if (not nan_kontrol(rsi_v) and rsi_v <= 40) else 0.0
-
-    return {
-        "TKE": p_tke,
-        "StochRSI": p_stoch,
-        "MFI": p_mfi,
-        "RSI": p_rsi,
-        "TOPLAM": p_tke + p_stoch + p_mfi + p_rsi
-    }
+        p_stoch = 30.0 if (sk_v + sd_v) / 2 <= 20 else 0.0
+    p_mfi   = 30.0 if (not nan_kontrol(mfi_v) and mfi_v <= mfi_dip) else 0.0
+    p_rsi   = 10.0 if (not nan_kontrol(rsi_v) and rsi_v <= 40) else 0.0
+    return {"TKE":p_tke,"StochRSI":p_stoch,"MFI":p_mfi,"RSI":p_rsi,
+            "TOPLAM":p_tke+p_stoch+p_mfi+p_rsi}
 
 # ══════════════════════════════════════════════════════
 # ANALİZ
@@ -176,10 +185,10 @@ def analiz(hisse, df):
         sk, sd = hesapla_stoch_rsi(df)
         mfi = hesapla_mfi(df)
         rsi = hesapla_rsi(df)
-        md = mfi_dip_bul(mfi)
-        tv = float(tke.iloc[-1]); skv = float(sk.iloc[-1]); sdv = float(sd.iloc[-1])
-        mv = float(mfi.iloc[-1]); rv = float(rsi.iloc[-1]); fv = float(df["Close"].iloc[-1])
-        p = puan_hesapla(tv, skv, sdv, mv, rv, md)
+        md  = mfi_dip_bul(mfi)
+        tv=float(tke.iloc[-1]); skv=float(sk.iloc[-1]); sdv=float(sd.iloc[-1])
+        mv=float(mfi.iloc[-1]); rv=float(rsi.iloc[-1]); fv=float(df["Close"].iloc[-1])
+        p = puan_hesapla(tv,skv,sdv,mv,rv,md)
         return {
             "Hisse":hisse,"Fiyat":round(fv,2),
             "TKE":round(tv,2),"StochRSI_K":round(skv,2),"StochRSI_D":round(sdv,2),
@@ -192,26 +201,28 @@ def analiz(hisse, df):
         return None
 
 # ══════════════════════════════════════════════════════
-# GRAFİKLER - PLOTLY
+# GRAFİKLER — PLOTLY
 # ══════════════════════════════════════════════════════
 def pl_detay(s):
     fig = make_subplots(rows=5,cols=1,shared_xaxes=True,
         row_heights=[.30,.18,.18,.18,.16],vertical_spacing=0.03,
-        subplot_titles=[s["Hisse"]+" – Fiyat (TL)","TKE (30p)","Stokastik RSI (30p)","MFI (30p)","RSI (10p)"])
+        subplot_titles=[s["Hisse"]+" – Fiyat (TL)","TKE (30p)",
+                        "Stokastik RSI (30p)","MFI (30p)","RSI (10p)"])
     def ln(sr,nm,cl,rw,ds="solid"):
         fig.add_trace(go.Scatter(x=sr.index,y=sr.values,name=nm,
             line=dict(color=cl,width=2,dash=ds)),row=rw,col=1)
     def hl(rw,y,cl,lb):
         fig.add_hline(y=y,row=rw,col=1,line=dict(color=cl,width=1,dash="dash"),
-            annotation_text=lb,annotation_font=dict(size=9,color=cl),annotation_position="right")
+            annotation_text=lb,annotation_font=dict(size=9,color=cl),
+            annotation_position="right")
     ln(s["_close"],"Fiyat",R["fiyat"],1)
-    ln(s["_tke"],"TKE",R["TKE"],2); hl(2,20,R["g"],"Dip(20) ✅"); hl(2,80,R["r"],"Tepe(80)")
+    ln(s["_tke"],"TKE",R["TKE"],2);   hl(2,20,R["g"],"Dip(20) ✅"); hl(2,80,R["r"],"Tepe(80)")
     ln(s["_sk"],"%K",R["StochRSI"],3); ln(s["_sd"],"%D","#FF9F1C",3,ds="dot")
     hl(3,20,R["g"],"Dip(20) ✅")
     ln(s["_mfi"],"MFI",R["MFI"],4)
     hl(4,s["MFI_Dip"],R["g"],"Dip("+str(round(s["MFI_Dip"],1))+") ✅")
     hl(4,80,R["r"],"Tepe(80)")
-    ln(s["_rsi"],"RSI",R["RSI"],5); hl(5,40,R["g"],"Dip(40) ✅"); hl(5,60,R["r"],"Tepe(60)")
+    ln(s["_rsi"],"RSI",R["RSI"],5);   hl(5,40,R["g"],"Dip(40) ✅"); hl(5,60,R["r"],"Tepe(60)")
     fig.update_layout(template="plotly_dark",height=750,paper_bgcolor=R["bg"],
         plot_bgcolor=R["panel"],font=dict(color=R["txt"],family="monospace"),
         legend=dict(orientation="h",y=-0.04),margin=dict(l=50,r=90,t=50,b=40),
@@ -231,11 +242,12 @@ def pl_radar(s):
         angularaxis=dict(color=R["txt"])),paper_bgcolor=R["bg"],
         font=dict(color=R["txt"]),showlegend=False,height=340,
         margin=dict(l=40,r=40,t=50,b=30),
-        title=dict(text="🎯 "+s["Hisse"]+" – Puan Radar",font=dict(size=14,color=R["fiyat"])))
+        title=dict(text="🎯 "+s["Hisse"]+" – Puan Radar",
+            font=dict(size=14,color=R["fiyat"])))
     return fig
 
-def pl_bar(df, top_n=20):
-    top = df.head(top_n).sort_values("Puan_Toplam",ascending=True)
+def pl_bar(df_in, top_n=20):
+    top = df_in.head(top_n).sort_values("Puan_Toplam",ascending=True)
     fig = go.Figure()
     for k,cl,lb in [("Puan_TKE",R["TKE"],"TKE (30p)"),
                     ("Puan_StochRSI",R["StochRSI"],"StochRSI (30p)"),
@@ -252,27 +264,29 @@ def pl_bar(df, top_n=20):
         margin=dict(l=70,r=30,t=60,b=80))
     return fig
 
-def pl_heat(df, top_n=30):
-    top = df.head(top_n)
+def pl_heat(df_in, top_n=30):
+    top  = df_in.head(top_n)
     kols = ["Puan_TKE","Puan_StochRSI","Puan_MFI","Puan_RSI","Puan_Toplam"]
-    etk = ["TKE","StochRSI","MFI","RSI","TOPLAM"]
-    z = top[kols].values.tolist()
-    fig = go.Figure(go.Heatmap(z=z,x=etk,y=top["Hisse"].tolist(),
+    etk  = ["TKE","StochRSI","MFI","RSI","TOPLAM"]
+    z    = top[kols].values.tolist()
+    fig  = go.Figure(go.Heatmap(z=z,x=etk,y=top["Hisse"].tolist(),
         colorscale="RdYlGn",zmin=0,zmax=100,
         text=[[str(round(v,0)) for v in row] for row in z],
         texttemplate="%{text}",textfont=dict(size=10),colorbar=dict(title="Puan")))
     fig.update_layout(template="plotly_dark",paper_bgcolor=R["bg"],plot_bgcolor=R["panel"],
-        font=dict(color=R["txt"]),height=max(500,top_n*22),margin=dict(l=80,r=30,t=60,b=40),
+        font=dict(color=R["txt"]),height=max(500,top_n*22),
+        margin=dict(l=80,r=30,t=60,b=40),
         title=dict(text="🌡️ Isı Haritası – İlk "+str(top_n)+" Hisse",
             font=dict(size=16,color=R["fiyat"])))
     return fig
 
 # ══════════════════════════════════════════════════════
-# GRAFİKLER - MATLOTLİB
+# GRAFİKLER — MATLOTLİB
 # ══════════════════════════════════════════════════════
 def mpl_detay(s):
     fig = plt.figure(figsize=(14,10),facecolor=R["bg"])
-    gs = gridspec.GridSpec(5,1,figure=fig,hspace=0.08,height_ratios=[2.5,1.2,1.2,1.2,1.0])
+    gs  = gridspec.GridSpec(5,1,figure=fig,hspace=0.08,
+                            height_ratios=[2.5,1.2,1.2,1.2,1.0])
     axs = [fig.add_subplot(gs[i]) for i in range(5)]
     for ax in axs:
         ax.set_facecolor(R["panel"]); ax.tick_params(colors=R["txt"],labelsize=8)
@@ -286,7 +300,8 @@ def mpl_detay(s):
         (axs[3],s["_mfi"],R["MFI"],"MFI",s["MFI_Dip"],80),
         (axs[4],s["_rsi"],R["RSI"],"RSI",40,60)]:
         ax.plot(range(len(sr)),sr.values,color=cl,lw=1.5)
-        ax.axhline(dp,color=R["g"],lw=0.8,ls="--"); ax.axhline(tp,color=R["r"],lw=0.8,ls="--")
+        ax.axhline(dp,color=R["g"],lw=0.8,ls="--")
+        ax.axhline(tp,color=R["r"],lw=0.8,ls="--")
         ax.set_ylabel(lb,color=R["txt"],fontsize=9); ax.set_ylim(0,100)
     axs[2].plot(range(len(s["_sk"])),s["_sk"].values,color=R["StochRSI"],lw=1.5,label="%K")
     axs[2].plot(range(len(s["_sd"])),s["_sd"].values,color="#FF9F1C",lw=1,ls=":",label="%D")
@@ -298,10 +313,10 @@ def mpl_detay(s):
     plt.tight_layout(); return fig
 
 def mpl_puan(s):
-    fig, ax = plt.subplots(figsize=(6,3),facecolor=R["bg"]); ax.set_facecolor(R["panel"])
+    fig,ax = plt.subplots(figsize=(6,3),facecolor=R["bg"]); ax.set_facecolor(R["panel"])
     cats = ["TKE\n(30p)","StochRSI\n(30p)","MFI\n(30p)","RSI\n(10p)"]
-    ps = [s["Puan_TKE"],s["Puan_StochRSI"],s["Puan_MFI"],s["Puan_RSI"]]
-    cls = [R["TKE"],R["StochRSI"],R["MFI"],R["RSI"]]
+    ps   = [s["Puan_TKE"],s["Puan_StochRSI"],s["Puan_MFI"],s["Puan_RSI"]]
+    cls  = [R["TKE"],R["StochRSI"],R["MFI"],R["RSI"]]
     bars = ax.bar(cats,ps,color=cls,edgecolor="none",width=0.55)
     for b,p in zip(bars,ps):
         ax.text(b.get_x()+b.get_width()/2,b.get_height()+0.3,
@@ -312,62 +327,48 @@ def mpl_puan(s):
     fig.tight_layout(); return fig
 
 # ══════════════════════════════════════════════════════
-# STREAMLIT ARAYÜZ
+# ORTAK TARAMA FONKSİYONU
 # ══════════════════════════════════════════════════════
-st.set_page_config(page_title="BIST 100 Dip Bulucu",page_icon="📉",
-    layout="wide",initial_sidebar_state="expanded")
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
-html,body,[class*="css"]{font-family:'Syne',sans-serif;background:#0f0f1a;color:#e0e0e0;}
-.stApp{background-color:#0f0f1a;}
-h1{font-size:2rem!important;color:#FF6B35!important;}
-h2{color:#4ECDC4!important;} h3{color:#FFE66D!important;}
-.kart{background:#16213E;border:1px solid #1a1a3e;border-radius:12px;padding:16px 20px;text-align:center;}
-.kart-val{font-size:1.9rem;font-weight:700;font-family:'JetBrains Mono',monospace;}
-.kart-lbl{font-size:0.72rem;color:#888;margin-top:4px;}
-.yesil{color:#06D6A0;}.sari{color:#FFE66D;}.kirmizi{color:#EF476F;}
-.stButton>button{background:linear-gradient(135deg,#FF6B35,#FF9F1C);color:white;
-    font-weight:700;border:none;border-radius:8px;padding:.5rem 1.5rem;}
-</style>""",unsafe_allow_html=True)
+def tarama_yap(liste, periyot, baslik):
+    st.info(f"📡 {baslik} taranıyor — {len(liste)} hisse...")
+    prog = st.progress(0); txt = st.empty()
+    veriler = {}; n = len(liste)
+    for i,h in enumerate(liste):
+        d = veri_cek(h, periyot)
+        if d is not None: veriler[h] = d
+        prog.progress((i+1)/n)
+        txt.text(f"⏳ {h}  ({i+1}/{n})")
+        time.sleep(0.04)
+    txt.text("📊 Puanlama hesaplanıyor...")
+    sonuclar = [analiz(h,d) for h,d in veriler.items()]
+    sonuclar = [s for s in sonuclar if s]
+    df_s = pd.DataFrame([{k:v for k,v in s.items() if not k.startswith("_")}
+                          for s in sonuclar])
+    df_s = df_s.sort_values("Puan_Toplam",ascending=False).reset_index(drop=True)
+    prog.empty(); txt.empty()
+    return df_s, sonuclar
 
-st.markdown("# 📉 BIST 100 Dip Bulucu")
-st.markdown("**TKE · Stokastik RSI · MFI · RSI** — Dip seviyesinde olan hisseleri puanlar")
-st.divider()
-
-with st.sidebar:
-    st.markdown("### ⚙️ Ayarlar")
-    periyot = st.selectbox("Veri Periyodu",["6mo","1y","2y"],index=1,
-        format_func=lambda x:{"6mo":"6 Ay","1y":"1 Yıl","2y":"2 Yıl"}[x])
-    min_puan = st.slider("Minimum Puan Filtresi",0,100,40,step=10)
-    top_n = st.slider("Gösterilecek Hisse Sayısı",5,50,20,step=5)
-    st.divider()
-    st.markdown("**Puanlama Sistemi**")
-    st.caption("Her indikatör ya tam puan ya 0 verir:")
-    st.caption("TKE < 20 → **30p** | yoksa 0")
-    st.caption("StochRSI K+D ort < 20 → **30p** | yoksa 0")
-    st.caption("MFI < dip seviyesi → **30p** | yoksa 0")
-    st.caption("RSI < 40 → **10p** | yoksa 0")
-    st.caption("Maksimum: **100p**")
-    st.divider()
-    tara_btn = st.button("🔍 Tüm BIST 100'ü Tara",use_container_width=True)
-    st.divider()
-    st.markdown("**Tek Hisse Analizi**")
-    tek_hisse = st.selectbox("Hisse Seç",sorted(BIST100))
-    tek_btn = st.button("📈 Analiz Et",use_container_width=True)
-
-for k in ["df_sonuc","sonuclar","tek_sonuc"]:
-    if k not in st.session_state: st.session_state[k] = None
-
-def goster(s):
+# ══════════════════════════════════════════════════════
+# DETAY GÖSTER
+# ══════════════════════════════════════════════════════
+def goster_detay(s):
     st.markdown("## 📈 "+s["Hisse"]+" – Detay Analizi")
+    rozetler = ""
+    if s["Hisse"] in BIST100:
+        rozetler += "<span class='badge-b100'>💯 BIST 100</span> "
+    if s["Hisse"] in YILDIZLAR:
+        rozetler += "<span class='badge-yildiz'>⭐ Yükselen Yıldız</span>"
+    if rozetler:
+        st.markdown(rozetler, unsafe_allow_html=True)
+    st.markdown("")
     c1,c2,c3,c4,c5 = st.columns(5)
     for col,(lb,val,mx) in zip([c1,c2,c3,c4,c5],[
         ("TOPLAM",s["Puan_Toplam"],100),("TKE",s["Puan_TKE"],30),
         ("StochRSI",s["Puan_StochRSI"],30),("MFI",s["Puan_MFI"],30),("RSI",s["Puan_RSI"],10)]):
-        r = "yesil" if val==mx else "kirmizi"
+        r    = "yesil" if val==mx else "kirmizi"
         ikon = " ✅" if val==mx else " ❌"
-        col.markdown('<div class="kart"><div class="kart-val '+r+'">'+str(int(val))+
+        col.markdown(
+            '<div class="kart"><div class="kart-val '+r+'">'+str(int(val))+
             '</div><div class="kart-lbl">'+lb+ikon+' / '+str(mx)+'</div></div>',
             unsafe_allow_html=True)
     st.markdown("")
@@ -383,30 +384,103 @@ def goster(s):
         st.download_button("⬇️ PNG İndir",data=buf,
             file_name=s["Hisse"]+"_analiz.png",mime="image/png")
 
-if tara_btn:
-    st.info("📡 Veriler çekiliyor... (~2 dk)")
-    prog = st.progress(0); txt = st.empty()
-    veriler = {}; top = len(BIST100)
-    for i,h in enumerate(BIST100):
-        d = veri_cek(h,periyot)
-        if d is not None: veriler[h] = d
-        prog.progress((i+1)/top)
-        txt.text("⏳ "+h+" ("+str(i+1)+"/"+str(top)+")")
-        time.sleep(0.04)
-    txt.text("📊 Puanlama hesaplanıyor...")
-    sonuclar = [analiz(h,d) for h,d in veriler.items()]
-    sonuclar = [s for s in sonuclar if s]
-    df_s = pd.DataFrame([{k:v for k,v in s.items() if not k.startswith("_")} for s in sonuclar])
-    df_s = df_s.sort_values("Puan_Toplam",ascending=False).reset_index(drop=True)
-    prog.empty(); txt.empty()
-    st.session_state.df_sonuc = df_s
-    st.session_state.sonuclar = sonuclar
-    st.success("✅ "+str(len(df_s))+" hisse analiz edildi!")
+# ══════════════════════════════════════════════════════
+# STREAMLIT ARAYÜZ
+# ══════════════════════════════════════════════════════
+st.set_page_config(page_title="BIST Dip Bulucu",page_icon="📉",
+    layout="wide",initial_sidebar_state="expanded")
 
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+html,body,[class*="css"]{font-family:'Syne',sans-serif;background:#0f0f1a;color:#e0e0e0;}
+.stApp{background-color:#0f0f1a;}
+h1{font-size:2rem!important;color:#FF6B35!important;}
+h2{color:#4ECDC4!important;} h3{color:#FFE66D!important;}
+.kart{background:#16213E;border:1px solid #1a1a3e;border-radius:12px;
+      padding:16px 20px;text-align:center;}
+.kart-val{font-size:1.9rem;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.kart-lbl{font-size:0.72rem;color:#888;margin-top:4px;}
+.yesil{color:#06D6A0;}.sari{color:#FFE66D;}.kirmizi{color:#EF476F;}
+.badge-b100{background:#1a3a2e;color:#06D6A0;border:1px solid #06D6A0;
+    border-radius:6px;padding:2px 8px;font-size:0.65rem;font-weight:700;margin-left:4px;}
+.badge-yildiz{background:#2a1a3a;color:#FFE66D;border:1px solid #FFE66D;
+    border-radius:6px;padding:2px 8px;font-size:0.65rem;font-weight:700;margin-left:4px;}
+.stButton>button{background:linear-gradient(135deg,#FF6B35,#FF9F1C);color:white;
+    font-weight:700;border:none;border-radius:8px;padding:.5rem 1.5rem;width:100%;}
+</style>""", unsafe_allow_html=True)
+
+st.markdown("# 📉 BIST Dip Bulucu")
+st.markdown("**TKE · Stokastik RSI · MFI · RSI** — Dip seviyesinde olan hisseleri puanlar")
+st.markdown(
+    f"<span class='badge-b100'>💯 BIST 100: {len(BIST100)} hisse</span>"
+    f"<span class='badge-yildiz'>⭐ Yükselen Yıldızlar: {len(YILDIZLAR)} hisse</span>"
+    f"<span style='color:#555;font-size:0.73rem;margin-left:8px;'>"
+    f"Toplam: {len(TUMHISSELER)} hisse &nbsp;|&nbsp; 1 Nisan 2026 endeks güncel</span>",
+    unsafe_allow_html=True)
+st.divider()
+
+# ── SIDEBAR ──
+with st.sidebar:
+    st.markdown("### ⚙️ Ayarlar")
+    periyot  = st.selectbox("Veri Periyodu",["6mo","1y","2y"],index=1,
+        format_func=lambda x:{"6mo":"6 Ay","1y":"1 Yıl","2y":"2 Yıl"}[x])
+    min_puan = st.slider("Minimum Puan Filtresi",0,100,40,step=10)
+    top_n    = st.slider("Gösterilecek Hisse Sayısı",5,50,20,step=5)
+    st.divider()
+    st.markdown("**Puanlama Sistemi**")
+    st.caption("TKE < 20            → **30p** | yoksa 0")
+    st.caption("StochRSI K+D < 20   → **30p** | yoksa 0")
+    st.caption("MFI < dip seviyesi  → **30p** | yoksa 0")
+    st.caption("RSI < 40            → **10p** | yoksa 0")
+    st.caption("Maksimum: **100p**")
+    st.divider()
+
+    st.markdown("### 🔍 Tarama Seç")
+    tum_btn    = st.button(
+        f"🌐 Tüm Hisseleri Tara  ({len(TUMHISSELER)})",
+        help="BIST 100 + 14 Yükselen Yıldız — toplam hisse")
+    bist_btn   = st.button(
+        f"💯 Sadece BIST 100  ({len(BIST100)})",
+        help="1 Nisan 2026 resmi endeks listesi")
+    yildiz_btn = st.button(
+        f"⭐ Yükselen Yıldızlar  ({len(YILDIZLAR)})",
+        help="14 seçilmiş küçük-cap hisse — 2030-2035 hedefli")
+
+    st.divider()
+    st.markdown("**Tek Hisse Analizi**")
+    tek_hisse = st.selectbox("Hisse Seç", sorted(TUMHISSELER))
+    tek_btn   = st.button("📈 Analiz Et")
+
+# ── SESSION STATE ──
+for k in ["df_sonuc","sonuclar","tek_sonuc","aktif_mod"]:
+    if k not in st.session_state: st.session_state[k] = None
+
+# ── TARAMA ──
+if tum_btn:
+    st.session_state.aktif_mod = f"🌐 Tüm Hisseler ({len(TUMHISSELER)} hisse)"
+    df_s,snc = tarama_yap(TUMHISSELER, periyot, "Tüm hisseler")
+    st.session_state.df_sonuc = df_s; st.session_state.sonuclar = snc
+    st.success(f"✅ {len(df_s)} hisse analiz edildi!")
+
+if bist_btn:
+    st.session_state.aktif_mod = f"💯 BIST 100 ({len(BIST100)} hisse — 1 Nisan 2026 güncel)"
+    df_s,snc = tarama_yap(BIST100, periyot, "BIST 100")
+    st.session_state.df_sonuc = df_s; st.session_state.sonuclar = snc
+    st.success(f"✅ {len(df_s)} BIST 100 hissesi analiz edildi!")
+
+if yildiz_btn:
+    st.session_state.aktif_mod = f"⭐ Yükselen Yıldızlar ({len(YILDIZLAR)} hisse)"
+    df_s,snc = tarama_yap(YILDIZLAR, periyot, "Yükselen Yıldızlar")
+    st.session_state.df_sonuc = df_s; st.session_state.sonuclar = snc
+    st.success(f"✅ {len(df_s)} yükselen yıldız analiz edildi!")
+
+# ── SONUÇ GÖSTERİMİ ──
 if st.session_state.df_sonuc is not None:
-    df = st.session_state.df_sonuc
-    df_f = df[df["Puan_Toplam"] >= min_puan]
-    st.markdown("## 🏆 Dip Puanlama Sonuçları")
+    df   = st.session_state.df_sonuc
+    df_f = df[df["Puan_Toplam"] >= min_puan].copy()
+
+    st.markdown(f"## 🏆 Sonuçlar — {st.session_state.aktif_mod}")
     c1,c2,c3,c4 = st.columns(4)
     t1 = df.iloc[0]
     for col,val,lb in [
@@ -414,43 +488,56 @@ if st.session_state.df_sonuc is not None:
         (c2,str(t1["Hisse"]),"En İyi: "+str(int(t1["Puan_Toplam"]))+"p"),
         (c3,str(int(df["Puan_Toplam"].mean())),"Ortalama Puan"),
         (c4,str((df["Puan_Toplam"]>=60).sum()),"60+ Puan")]:
-        col.markdown('<div class="kart"><div class="kart-val sari">'+val+
-            '</div><div class="kart-lbl">'+lb+'</div></div>',unsafe_allow_html=True)
+        col.markdown(
+            '<div class="kart"><div class="kart-val sari">'+val+
+            '</div><div class="kart-lbl">'+lb+'</div></div>',
+            unsafe_allow_html=True)
     st.markdown("")
-    t1,t2,t3 = st.tabs(["📊 Bar Sıralama","🌡️ Isı Haritası","📋 Tablo"])
-    with t1: st.plotly_chart(pl_bar(df_f,top_n),use_container_width=True)
-    with t2: st.plotly_chart(pl_heat(df_f,top_n),use_container_width=True)
-    with t3:
-        kols = ["Hisse","Fiyat","Puan_Toplam","TKE","Puan_TKE",
+
+    tab1,tab2,tab3 = st.tabs(["📊 Bar Sıralama","🌡️ Isı Haritası","📋 Tablo"])
+    with tab1: st.plotly_chart(pl_bar(df_f,top_n),use_container_width=True)
+    with tab2: st.plotly_chart(pl_heat(df_f,top_n),use_container_width=True)
+    with tab3:
+        df_f["Tip"] = df_f["Hisse"].apply(
+            lambda h: "💯 BIST100" if h in BIST100 else
+                      ("⭐ Yıldız"  if h in YILDIZLAR else "—"))
+        kols = ["Tip","Hisse","Fiyat","Puan_Toplam","TKE","Puan_TKE",
                 "StochRSI_K","StochRSI_D","Puan_StochRSI",
                 "MFI","MFI_Dip","Puan_MFI","RSI","Puan_RSI"]
-        st.dataframe(df_f[kols].style.background_gradient(
-            subset=["Puan_Toplam"],cmap="RdYlGn").format(precision=2),
+        st.dataframe(
+            df_f[kols].style.background_gradient(
+                subset=["Puan_Toplam"],cmap="RdYlGn").format(precision=2),
             use_container_width=True,height=500)
         csv = df_f[kols].to_csv(index=False).encode("utf-8")
         st.download_button("⬇️ CSV İndir",data=csv,
-            file_name="bist100_dip.csv",mime="text/csv")
-    if st.session_state.sonuclar:
-        st.divider(); st.markdown("### 🔎 Listeden Hisse Detayı")
-        sec = st.selectbox("Hisse",[s["Hisse"] for s in st.session_state.sonuclar],key="ls")
-        ss = next((s for s in st.session_state.sonuclar if s["Hisse"]==sec),None)
-        if ss: goster(ss)
+            file_name="bist_dip.csv",mime="text/csv")
 
+    if st.session_state.sonuclar:
+        st.divider()
+        st.markdown("### 🔎 Listeden Hisse Detayı")
+        sec = st.selectbox("Hisse",
+            [s["Hisse"] for s in st.session_state.sonuclar], key="ls")
+        ss = next((s for s in st.session_state.sonuclar if s["Hisse"]==sec), None)
+        if ss: goster_detay(ss)
+
+# ── TEK HİSSE ──
 if tek_btn:
     with st.spinner("📡 "+tek_hisse+" çekiliyor..."):
-        df_t = veri_cek(tek_hisse,periyot)
+        df_t = veri_cek(tek_hisse, periyot)
     if df_t is None:
         st.error("❌ "+tek_hisse+" için veri alınamadı.")
     else:
-        s = analiz(tek_hisse,df_t)
+        s = analiz(tek_hisse, df_t)
         if s: st.session_state.tek_sonuc = s
         else: st.error("❌ Analiz hesaplanamadı.")
 
-if st.session_state.tek_sonuc and not tara_btn:
-    goster(st.session_state.tek_sonuc)
+if st.session_state.tek_sonuc and not any([tum_btn,bist_btn,yildiz_btn]):
+    goster_detay(st.session_state.tek_sonuc)
 
 st.divider()
-st.markdown("""<div style='text-align:center;color:#444;font-size:.75rem;'>
-BIST 100 Dip Bulucu · TKE (Kıvanç Özbilgiç) · Stokastik RSI · MFI · RSI<br>
+st.markdown("""
+<div style='text-align:center;color:#444;font-size:.75rem;'>
+BIST Dip Bulucu · TKE (Kıvanç Özbilgiç) · Stokastik RSI · MFI · RSI<br>
+BIST 100 listesi: 1 Nisan 2026 resmi endeks (ULKER/DOHOL/SOKM BIST 100'de)<br>
 ⚠️ Yatırım tavsiyesi değildir. Veriler Yahoo Finance'den çekilmektedir.
-</div>""",unsafe_allow_html=True)
+</div>""", unsafe_allow_html=True)
