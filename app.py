@@ -13,29 +13,28 @@ from scipy import stats
 # ══════════════════════════════════════════════════════
 # BIST 100 LİSTESİ — 1 Nisan 2026 İtibariyle Kesin Güncel
 #
-# BIST 100'den ÇIKAN (sadece 5 hisse):
-#   EGEEN, KOCR, TSPOR, TTRAK, YEOTK
+# BIST 100'den ÇIKAN (Nisan 2026):
+#   KCAER (Kocaer Çelik), TSPOR, TTRAK, YEOTK
+#   + Ocak 2026'da çıkanlar: CEMTS, BFREN, ENJSA
 #
-# BIST 100'e GİREN (5 hisse):
-#   CVKMD, EUPWR, PASEU, PAGYO, SARKY
+# BIST 100'e GİREN:
+#   CVKMD, EUPWR, PASEU, PAGYO, SARKY, CANTE, TURSG
 #
 # ÖNEMLİ NOTLAR:
-#   ULKER → Sadece BIST 30'dan çıktı, BIST 100'DE KALMAYA DEVAM EDİYOR
-#   DOHOL → Sadece BIST 50'den çıktı, BIST 100'DE KALMAYA DEVAM EDİYOR
-#   SOKM  → Sadece BIST 50'den çıktı, BIST 100'DE KALMAYA DEVAM EDİYOR
+#   ULKER → Sadece BIST 30'dan çıktı, BIST 100'DE KALIYOR
+#   DOHOL → Sadece BIST 50'den çıktı, BIST 100'DE KALIYOR
+#   SOKM  → Sadece BIST 50'den çıktı, BIST 100'DE KALIYOR
 #   VAKBN → BIST 30'a girdi, zaten BIST 100'deydi
-#   CANTE → BIST 50'ye girdi, BIST 100'e de eklendi
-#   TURSG → BIST 50'ye girdi, BIST 100'e de eklendi
 # ══════════════════════════════════════════════════════
 BIST100 = [
     "ACSEL","ADEL","AEFES","AGESA","AGHOL","AKBNK","AKSA","AKSEN",
     "ALARK","ALBRK","ALFAS","ALKIM","ANACM","ARCLK","ARDYZ","ASELS",
-    "ASTOR","BERA","BFREN","BIMAS","BIOEN","BRISA","BRYAT","BUCIM",
-    "CANTE","CCOLA","CEMTS","CIMSA","CLEBI","CVKMD",
-    "DOAS","DOHOL","DSTKF","DYOBY","ECILC","ENJSA","ENKAI","EREGL","EUPWR",
+    "ASTOR","BERA","BIMAS","BIOEN","BRISA","BRYAT","BUCIM",
+    "CANTE","CCOLA","CIMSA","CLEBI","CVKMD",
+    "DOAS","DOHOL","DSTKF","DYOBY","ECILC","ENKAI","EREGL","EUPWR",
     "FROTO","GARAN","GESAN","GLYHO","GOLTS","GUBRF",
     "HALKB","HEKTS","IPEKE","ISCTR","ISFIN","ISGYO","ISYHO","ITTFK","IZOCM",
-    "KAREL","KARSN","KCAER","KCHOL","KLMSN","KONTR","KONYA","KORDS",
+    "KAREL","KARSN","KCHOL","KLMSN","KONTR","KONYA","KORDS",
     "KOZAA","KOZAL","KRDMD","LOGO","MAVI","MGROS","MPARK",
     "NETAS","ODAS","OTKAR","OYAKC","PAGYO","PASEU",
     "PETKM","PGSUS","PKENT","POLHO","PRKME","QUAGR",
@@ -49,20 +48,20 @@ BIST100 = [
 # BIST 100 dışı, 2030-2035 hedefli seçilmiş hisseler
 # ══════════════════════════════════════════════════════
 YILDIZLAR = [
-    "A1CAP",   # A1 Capital — Finans ekosistemi
-    "SDTTR",   # SDT Uzay ve Savunma
-    "ALTNY",   # Altınay Savunma
-    "HTTBT",   # Hitit Bilgisayar
-    "GWIND",   # Galata Wind
-    "RYSAS",   # Reysaş Lojistik
-    "GENIL",   # Gen İlaç
-    "PAPIL",   # Papilon Savunma
-    "MAGEN",   # Margün Enerji
-    "FORTE",   # Forte Bilişim
-    "RTALB",   # RTA Laboratuvarları
-    "LKMNH",   # Lokman Hekim
-    "VBTYZ",   # VBT Yazılım
-    "KFEIN",   # Kafein Yazılım
+    "A1CAP",   # 1  — A1 Capital         | Finans       | 🟡 Orta
+    "SDTTR",   # 2  — SDT Uzay Savunma   | Savunma      | 🟢 Düşük
+    "ALTNY",   # 3  — Altınay Savunma    | Savunma      | 🟢 Düşük
+    "HTTBT",   # 4  — Hitit Bilgisayar   | Teknoloji    | 🟢 Düşük
+    "KARSN",   # 5  — Karsan             | Mobilite     | 🟡 Orta
+    "MPARK",   # 6  — MLP Sağlık         | Sağlık       | 🟢 Düşük
+    "KAREL",   # 7  — Karel Elektronik   | Elektronik   | 🟡 Orta
+    "GWIND",   # 8  — Galata Wind        | Enerji       | 🟢 Düşük
+    "RYSAS",   # 9  — Reysaş Lojistik   | Lojistik     | 🟡 Orta
+    "GENIL",   # 10 — Gen İlaç           | İlaç         | 🟠 Yüksek
+    "PAPIL",   # 11 — Papilon Savunma    | Savunma      | 🟠 Yüksek
+    "EUPWR",   # 12 — Europower Enerji   | Enerji       | 🟡 Orta
+    "MAGEN",   # 13 — Margün Enerji      | Enerji       | 🟡 Orta
+    "FORTE",   # 14 — Forte Bilişim      | Teknoloji    | 🟠 Yüksek
 ]
 
 # TÜM HİSSELER = BIST100 + YILDIZLAR (tekrar olmayanlar)
